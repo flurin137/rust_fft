@@ -7,7 +7,7 @@ fn main() {
 }
 
 fn calculate_fft(input_signal: Vec<f64>) -> Vec<f64> {
-    let n = input_signal.len() / 2;
+    let n = input_signal.len();
 
     let complex_input = input_signal
         .iter()
@@ -16,7 +16,7 @@ fn calculate_fft(input_signal: Vec<f64>) -> Vec<f64> {
 
     let complex = fft(n, complex_input);
 
-    return complex.iter().map(|x| x.re).collect_vec()[..n / 2].to_vec();
+    return complex.iter().map(|x| x.abs()).collect_vec().to_vec();
 }
 
 fn fft(n: usize, signal: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
@@ -40,28 +40,14 @@ fn fft(n: usize, signal: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
     let g = fft(n_2, g_in);
     let u = fft(n_2, u_in);
 
-    let mut x = vec![];
-    println!("N {n} | G {g:?} | U {u:?}");
-
-    for i in 0..n {
-        if i % 2 == 0 {
-            x.push(g[i])
-        } else {
-            x.push(u[i - 1])
-        }
-    }
-
     let mut result = vec![Complex::new(0.0, 0.0); n];
 
     for k in 0..(n_2) {
         let base = -2.0 * PI * Complex::i() * (k as f64) / (n as f64);
         let factor = base.exp();
 
-        let p = x[k];
-        let q = factor * x[k + n_2];
-
-        result[k] = p + q;
-        result[k + n_2] = p - q;
+        result[k] = g[k] + u[k] * factor;
+        result[k + n_2] = g[k] - u[k] * factor;
     }
 
     return result;
@@ -74,12 +60,30 @@ mod tests {
     #[test]
     fn test_add() {
         let input = vec![
-            0.00, 0.77, 1.33, 1.54, 1.38, 0.95, 0.45, 0.09, 0.01, 0.24, 0.69, 1.18, 1.50, 1.49,
-            1.09, 0.41, -0.39, -1.09, -1.48, -1.50, -1.19, -0.70, -0.25, -0.01, -0.09, -0.45,
-            -0.94, -1.37, -1.54, -1.34, -0.78, -0.01,
+            0.0, 0.95, 1.1, 0.4, -0.4, -0.45, 0.37, 1.4, 1.7, 1.1, 0.2, -0.091, 0.54, 1.5, 2.0,
+            1.5, 0.51, -0.01, 0.4, 1.3, 1.9, 1.5, 0.49, -0.24, -0.073, 0.77, 1.4, 1.2, 0.2, -0.7,
+            -0.75, 0.0,
         ];
-        let expected_result = vec![];
 
-        assert_eq!(calculate_fft(input), expected_result);
+        let expected_result = vec![
+            20.0, 7.2, 1.5, 1.0, 1.9, 15.0, 3.2, 1.6, 1.1, 0.91, 0.78, 0.69, 0.63, 0.6, 0.57, 0.56,
+            0.56, 0.56, 0.57, 0.6, 0.63, 0.69, 0.78, 0.91, 1.1, 1.6, 3.2, 15.0, 1.9, 1.0, 1.5, 7.2,
+        ];
+        let fft = calculate_fft(input);
+        print!("{fft:?}");
+        assert_eq!(fft, expected_result);
+    }
+
+    #[test]
+    fn _1() {
+        let input = vec![0.0, -0.54, 1.2, 1.8, 0.19, 0.35, 1.4, 0.0];
+
+        let expected_result = vec![
+            4.38128627, 2.10632708, 3.11669564, 1.8615992, 1.25396034, 1.8615992, 3.11669564,
+            2.10632708,
+        ];
+        let fft = calculate_fft(input);
+        print!("{fft:?}");
+        assert_eq!(fft, expected_result);
     }
 }
