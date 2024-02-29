@@ -4,5 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cortex-m = { version = "0.7.3", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7.3"
+embedded-alloc = "0.5.1"
 libm = "0.2.8"
 num = { version = "0.4.1", features = ["libm"], default_features = false }

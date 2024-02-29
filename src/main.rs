@@ -1,10 +1,37 @@
+#![no_std]
+#![no_main]
+
+#[macro_use]
+extern crate alloc;
+
+use core::panic::PanicInfo;
+
+use alloc::vec::Vec;
+use cortex_m_rt::entry;
+use embedded_alloc::Heap;
 use num::complex::{Complex, ComplexFloat};
 
 const PI: f32 = 3.1415926536;
-const E: f32 = 2.7182818285;
 
-fn main() {
-    println!("Hello, world!");
+#[cfg(not(test))]
+#[panic_handler]
+fn asdf(info: &PanicInfo) -> ! {
+    loop {}
+}
+
+#[global_allocator]
+static HEAP: Heap = Heap::empty();
+
+#[entry]
+fn main() -> ! {
+    {
+        use core::mem::MaybeUninit;
+        const HEAP_SIZE: usize = 1024;
+        static mut HEAP_MEM: [MaybeUninit<u8>; HEAP_SIZE] = [MaybeUninit::uninit(); HEAP_SIZE];
+        unsafe { HEAP.init(HEAP_MEM.as_ptr() as usize, HEAP_SIZE) }
+    }
+
+    loop {}
 }
 
 fn calculate_fft(input_signal: Vec<f32>) -> Vec<f32> {
@@ -71,7 +98,6 @@ mod tests {
             0.9707922, 1.5019984, 7.135661,
         ];
         let fft = calculate_fft(input);
-        print!("{fft:?}");
         assert_eq!(fft, expected_result);
     }
 
@@ -83,7 +109,6 @@ mod tests {
             4.3999996, 2.1386015, 3.1254117, 1.9086071, 1.1800001, 1.9086074, 3.1254117, 2.1386015,
         ];
         let fft = calculate_fft(input);
-        print!("{fft:?}");
         assert_eq!(fft, expected_result);
     }
 }
