@@ -1,4 +1,4 @@
-use itertools::Itertools;
+
 use num::complex::{Complex, ComplexFloat};
 
 const PI : f32 = 3.1415926536;
@@ -13,11 +13,11 @@ fn calculate_fft(input_signal: Vec<f32>) -> Vec<f32> {
     let complex_input = input_signal
         .iter()
         .map(|x| Complex::new(*x, 0.0))
-        .collect_vec();
+        .collect();
 
     let complex = fft(n, complex_input);
 
-    return complex.iter().map(|x| x.abs()).collect_vec().to_vec();
+    return complex.iter().map(|x| x.abs()).collect();
 }
 
 fn fft(n: usize, signal: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
