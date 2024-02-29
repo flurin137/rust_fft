@@ -1,4 +1,4 @@
-use num::complex::Complex;
+use num::complex::{Complex, ComplexFloat};
 
 const PI: f32 = 3.1415926536;
 const E: f32 = 2.7182818285;
@@ -14,17 +14,7 @@ fn calculate_fft(input_signal: Vec<f32>) -> Vec<f32> {
 
     let complex = fft(n, complex_input);
 
-    complex.iter().map(|x| abs(*x)).collect()
-}
-
-fn abs(number: Complex<f32>) -> f32 {
-    f32::sqrt(number.im * number.im + number.re * number.re)
-}
-
-fn exp(number: Complex<f32>) -> Complex<f32> {
-    let r = number.re.exp();
-    let theta = number.im;
-    Complex::new(r * theta.cos(), r * theta.sin())
+    complex.iter().map(|x| x.abs()).collect()
 }
 
 fn fft(n: usize, signal: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
@@ -52,7 +42,7 @@ fn fft(n: usize, signal: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
 
     for k in 0..(n_2) {
         let base = -2.0 * PI * Complex::i() * (k as f32) / (n as f32);
-        let factor = exp(base);
+        let factor = base.exp();
 
         result[k] = g[k] + u[k] * factor;
         result[k + n_2] = g[k] - u[k] * factor;
