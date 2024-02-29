@@ -1,12 +1,13 @@
 use itertools::Itertools;
 use num::complex::{Complex, ComplexFloat};
-use std::f64::consts::PI;
+
+const PI : f32 = 3.1415926536;
 
 fn main() {
     println!("Hello, world!");
 }
 
-fn calculate_fft(input_signal: Vec<f64>) -> Vec<f64> {
+fn calculate_fft(input_signal: Vec<f32>) -> Vec<f32> {
     let n = input_signal.len();
 
     let complex_input = input_signal
@@ -19,7 +20,7 @@ fn calculate_fft(input_signal: Vec<f64>) -> Vec<f64> {
     return complex.iter().map(|x| x.abs()).collect_vec().to_vec();
 }
 
-fn fft(n: usize, signal: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
+fn fft(n: usize, signal: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
     if n == 1 {
         return signal;
     }
@@ -43,7 +44,7 @@ fn fft(n: usize, signal: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
     let mut result = vec![Complex::new(0.0, 0.0); n];
 
     for k in 0..(n_2) {
-        let base = -2.0 * PI * Complex::i() * (k as f64) / (n as f64);
+        let base = -2.0 * PI * Complex::i() * (k as f32) / (n as f32);
         let factor = base.exp();
 
         result[k] = g[k] + u[k] * factor;
