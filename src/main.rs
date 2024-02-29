@@ -4,18 +4,16 @@
 #[macro_use]
 extern crate alloc;
 
-use core::panic::PanicInfo;
-
 use alloc::vec::Vec;
+use core::panic::PanicInfo;
 use cortex_m_rt::entry;
 use embedded_alloc::Heap;
 use num::complex::{Complex, ComplexFloat};
 
 const PI: f32 = 3.1415926536;
 
-#[cfg(not(test))]
 #[panic_handler]
-fn asdf(info: &PanicInfo) -> ! {
+fn asdf(_info: &PanicInfo) -> ! {
     loop {}
 }
 
