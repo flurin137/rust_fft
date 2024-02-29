@@ -1,35 +1,41 @@
 #![no_std]
 #![no_main]
+#![feature(type_alias_impl_trait)]
+#![feature(async_fn_in_trait)]
+#![allow(stable_features, unknown_lints, async_fn_in_trait)]
 
 #[macro_use]
 extern crate alloc;
 
 use alloc::vec::Vec;
-use core::panic::PanicInfo;
-use cortex_m_rt::entry;
+use defmt::info;
+use embassy_executor::Spawner;
 use embedded_alloc::Heap;
 use num::complex::{Complex, ComplexFloat};
+use {defmt_rtt as _, panic_probe as _};
 
 const PI: f32 = 3.1415926536;
-
-#[panic_handler]
-fn asdf(_info: &PanicInfo) -> ! {
-    loop {}
-}
 
 #[global_allocator]
 static HEAP: Heap = Heap::empty();
 
-#[entry]
-fn main() -> ! {
+#[embassy_executor::main]
+async fn main(_spawner: Spawner) {
     {
         use core::mem::MaybeUninit;
         const HEAP_SIZE: usize = 1024;
         static mut HEAP_MEM: [MaybeUninit<u8>; HEAP_SIZE] = [MaybeUninit::uninit(); HEAP_SIZE];
         unsafe { HEAP.init(HEAP_MEM.as_ptr() as usize, HEAP_SIZE) }
     }
+    let _peripherals = embassy_rp::init(Default::default());
 
-    loop {}
+    let input = vec![0.0, -0.54, 1.2, 1.8, 0.19, 0.35, 1.4, 0.0];
+
+    let values = calculate_fft(input);
+
+    for v in values {
+        info!("Value {}", v);
+    }
 }
 
 fn calculate_fft(input_signal: Vec<f32>) -> Vec<f32> {
@@ -73,5 +79,5 @@ fn fft(n: usize, signal: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
         result[k + n_2] = g[k] - u[k] * factor;
     }
 
-    return result;
+    result
 }
