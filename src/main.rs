@@ -1,7 +1,7 @@
+use num::complex::Complex;
 
-use num::complex::{Complex, ComplexFloat};
-
-const PI : f32 = 3.1415926536;
+const PI: f32 = 3.1415926536;
+const E: f32 = 2.7182818285;
 
 fn main() {
     println!("Hello, world!");
@@ -10,14 +10,21 @@ fn main() {
 fn calculate_fft(input_signal: Vec<f32>) -> Vec<f32> {
     let n = input_signal.len();
 
-    let complex_input = input_signal
-        .iter()
-        .map(|x| Complex::new(*x, 0.0))
-        .collect();
+    let complex_input = input_signal.iter().map(|x| Complex::new(*x, 0.0)).collect();
 
     let complex = fft(n, complex_input);
 
-    return complex.iter().map(|x| x.abs()).collect();
+    complex.iter().map(|x| abs(*x)).collect()
+}
+
+fn abs(number: Complex<f32>) -> f32 {
+    f32::sqrt(number.im * number.im + number.re * number.re)
+}
+
+fn exp(number: Complex<f32>) -> Complex<f32> {
+    let r = number.re.exp();
+    let theta = number.im;
+    Complex::new(r * theta.cos(), r * theta.sin())
 }
 
 fn fft(n: usize, signal: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
@@ -45,7 +52,7 @@ fn fft(n: usize, signal: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
 
     for k in 0..(n_2) {
         let base = -2.0 * PI * Complex::i() * (k as f32) / (n as f32);
-        let factor = base.exp();
+        let factor = exp(base);
 
         result[k] = g[k] + u[k] * factor;
         result[k + n_2] = g[k] - u[k] * factor;
@@ -67,8 +74,11 @@ mod tests {
         ];
 
         let expected_result = vec![
-            20.0, 7.2, 1.5, 1.0, 1.9, 15.0, 3.2, 1.6, 1.1, 0.91, 0.78, 0.69, 0.63, 0.6, 0.57, 0.56,
-            0.56, 0.56, 0.57, 0.6, 0.63, 0.69, 0.78, 0.91, 1.1, 1.6, 3.2, 15.0, 1.9, 1.0, 1.5, 7.2,
+            19.716, 7.1356616, 1.5019984, 0.9707915, 1.8354987, 15.065951, 3.1998298, 1.5920978,
+            1.1611935, 0.88543063, 0.87258303, 0.62757486, 0.7070812, 0.5255001, 0.51221985,
+            0.6415046, 0.5419998, 0.6415048, 0.5122198, 0.52550036, 0.7070813, 0.6275738,
+            0.87258315, 0.8854304, 1.1611935, 1.5920982, 3.1998298, 15.065952, 1.8354987,
+            0.9707922, 1.5019984, 7.135661,
         ];
         let fft = calculate_fft(input);
         print!("{fft:?}");
@@ -80,8 +90,7 @@ mod tests {
         let input = vec![0.0, -0.54, 1.2, 1.8, 0.19, 0.35, 1.4, 0.0];
 
         let expected_result = vec![
-            4.38128627, 2.10632708, 3.11669564, 1.8615992, 1.25396034, 1.8615992, 3.11669564,
-            2.10632708,
+            4.3999996, 2.1386015, 3.1254117, 1.9086071, 1.1800001, 1.9086074, 3.1254117, 2.1386015,
         ];
         let fft = calculate_fft(input);
         print!("{fft:?}");
